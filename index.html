@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Happy Birthday</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --accent1:#ff4d6d;
+    --accent2:#ff9ccf;
+    --bg1:#060010;
+    --bg2:#000000;
+    --glow:#ff7aa2;
+  }
+  html,body{height:100%;margin:0;background:#040008;font-family:Inter,system-ui,Arial,sans-serif;color:#fff;overflow:hidden}
+  canvas{position:fixed;inset:0;display:block;z-index:0}
+
+  /* Message overlay with different animation */
+  .message-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(6,0,16,0.9) 0%, rgba(0,0,0,0.95) 100%);
+    z-index: 8;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+    animation: pulseBackground 8s infinite alternate;
+  }
+  @keyframes pulseBackground {
+    0% { background: linear-gradient(135deg, rgba(6,0,16,0.9) 0%, rgba(0,0,0,0.95) 100%); }
+    100% { background: linear-gradient(135deg, rgba(20,0,40,0.9) 0%, rgba(0,0,10,0.95) 100%); }
+  }
+  .message-overlay.active {
+    opacity: 1;
+  }
+
+  /* Full-screen sections */
+  .fullscreen-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  
+  .fullscreen-section.active {
+    opacity: 1;
+  }
+  
+  /* Clock Overlay */
+  .clock-time{
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(42px, 12vw, 120px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 2px;
+    color: #ffd1e6;
+    filter: drop-shadow(0 0 10px rgba(255,120,160,.8)) drop-shadow(0 0 30px rgba(255,120,160,.35));
+    text-shadow: 0 0 0 rgba(0,0,0,0);
+    transform: translateY(0) scale(1);
+  }
+  .clock-sub{
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(18px, 4vw, 32px);
+    color: rgba(255,200,220,.85);
+    letter-spacing: 2px;
+    margin-top: 20px;
+  }
+
+  /* Birthday Message */
+  .birthday-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(48px, 10vw, 96px);
+    color: #ffd1e6;
+    text-shadow: 0 0 20px rgba(255, 120, 160, 0.8);
+    margin-bottom: 30px;
+  }
+  
+  .birthday-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(24px, 5vw, 42px);
+    color: #ffd1e6;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* Larger Media Container with 3D effects */
+  .media-container {
+    width: 90vw;
+    height: 70vh; /* Larger display area */
+    max-width: 900px;
+    position: relative;
+    margin: 20px auto;
+    perspective: 1000px;
+  }
+
+  /* Media Items with 3D animations */
+  .media-item {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    transition: transform 1s ease, opacity 1s ease;
+  }
+  
+  .media-item.active {
+    display: flex;
+    animation: none; /* Will be set dynamically */
+  }
+  
+  .media-item img {
+    max-width: 95%;
+    max-height: 95%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border: 10px solid transparent;
+    border-image: linear-gradient(45deg, #ff4d6d, #ff9ccf) 1;
+    box-shadow: 0 0 30px rgba(255, 120, 160, 0.5);
+  }
+  
+  .media-item video {
+    max-width: 95%;
+    max-height: 95%;
+    width: auto;
+    height: auto;
+    border: 10px solid transparent;
+    border-image: linear-gradient(45deg, #7aa2ff, #b6d0ff) 1;
+    box-shadow: 0 0 30px rgba(122, 162, 255, 0.5);
+  }
+
+  /* 3D Animation Keyframes */
+  @keyframes slideInFromLeft {
+    0% { transform: translateX(-100%) rotateY(-90deg); opacity: 0; }
+    100% { transform: translateX(0) rotateY(0); opacity: 1; }
+  }
+  @keyframes slideInFromRight {
+    0% { transform: translateX(100%) rotateY(90deg); opacity: 0; }
+    100% { transform: translateX(0) rotateY(0); opacity: 1; }
+  }
+  @keyframes zoomIn {
+    0% { transform: scale(0.5) rotate(45deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  @keyframes flipIn {
+    0% { transform: rotateX(90deg) rotateY(90deg); opacity: 0; }
+    100% { transform: rotateX(0) rotateY(0); opacity: 1; }
+  }
+
+  /* Typewriter effect */
+  .typewriter {
+    overflow: hidden;
+    white-space: pre-wrap;
+    margin: 0 auto;
+    letter-spacing: 1px;
+    width: 100%;
+  }
+
+  /* Final Wish */
+  .final-wish {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(36px, 8vw, 72px);
+    color: #ffd1e6;
+    text-shadow: 0 0 20px rgba(255, 120, 160, 0.8);
+    margin-bottom: 30px;
+  }
+  
+  .final-emoji {
+    font-size: clamp(48px, 10vw, 96px);
+    display: block;
+    margin: 20px 0;
+  }
+
+  /* Confetti container */
+  .confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: hidden;
+  }
+
+  /* Falling cats animation */
+  .falling-cat {
+    position: absolute;
+    font-size: 30px;
+    animation: fall linear forwards;
+    z-index: 1;
+  }
+  @keyframes fall {
+    to { transform: translateY(100vh); }
+  }
+
+  /* Music control button */
+  .music-control {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 20;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+  }
+  .music-control:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+  }
+</style>
+</head>
+<body>
+
+<!-- Background canvas -->
+<canvas id="bg"></canvas>
+
+<!-- Message overlay with different animation -->
+<div id="messageOverlay" class="message-overlay"></div>
+
+<!-- Confetti container -->
+<div id="confettiContainer" class="confetti-container"></div>
+
+<!-- Clock section -->
+<div id="clockSection" class="fullscreen-section">
+  <div class="clock-time">23:59:30</div>
+  <div class="clock-sub">The celebration is about to begin!</div>
+</div>
+
+<!-- Birthday Message section -->
+<div id="birthdaySection" class="fullscreen-section">
+  <div class="birthday-title">🎉Happy Birthday Junnu Munnu Billi!😺🎂</div>
+  <div class="birthday-text">Your special day is here!</div>
+</div>
+
+<!-- Media Display section -->
+<div id="mediaSection" class="fullscreen-section">
+  <div class="birthday-title">Our Beautiful Memories</div>
+  <div class="media-container" id="mediaContainer"></div>
+</div>
+
+<!-- Birthday Wish section -->
+<div id="wishSection" class="fullscreen-section">
+  <div class="birthday-title">A Special Wish</div>
+  <div class="birthday-text typewriter" id="typewriterText"></div>
+</div>
+
+<!-- Final Wish section -->
+<div id="finalSection" class="fullscreen-section">
+  <div class="final-wish">Happy Birthday Junnu Munnu Billi😺!</div>
+  <span class="final-emoji">🎉 🎂 🎁</span>
+  <div class="birthday-text">Wishing you an amazing year ahead!</div>
+</div>
+
+<!-- Music control button -->
+<button id="musicControl" class="music-control" aria-label="Toggle music">🎵</button>
+
+<!-- Audio -->
+<audio id="bgm" loop preload="auto">
+  <source src="assets/music.mp3" type="audio/mpeg"/>
+</audio>
+<audio id="tickSound" preload="auto">
+  <source src="assets/tick.mp3" type="audio/mpeg"/>
+</audio>
+<audio id="cheer" preload="auto">
+  <source src="assets/cheer.mp3" type="audio/mpeg"/>
+</audio>
+
+<script>
+// ========== Configuration ==========
+const MEDIA_FILES = [
+  // First set of memories (images + videos)
+  { type: 'image', src: 'assets/img1.jpg' },
+  { type: 'image', src: 'assets/img2.jpg' },
+  { type: 'video', src: 'assets/video1.mp4' },
+  { type: 'image', src: 'assets/img3.jpg' },
+  { type: 'image', src: 'assets/img4.jpg' },
+  { type: 'video', src: 'assets/video2.mp4' },
+  
+  // Second set of memories
+  { type: 'image', src: 'assets/img5.jpg' },
+  { type: 'image', src: 'assets/img6.jpg' },
+  { type: 'video', src: 'assets/video3.mp4' },
+  { type: 'image', src: 'assets/img7.jpg' },
+  { type: 'image', src: 'assets/img8.jpg' },
+  { type: 'video', src: 'assets/video4.mp4' },
+  
+  // Third set of memories
+  { type: 'image', src: 'assets/img9.jpg' },
+  { type: 'image', src: 'assets/img10.jpg' },
+  { type: 'video', src: 'assets/video5.mp4' },
+  { type: 'image', src: 'assets/img11.jpg' },
+  { type: 'image', src: 'assets/img12.jpg' },
+  { type: 'video', src: 'assets/video6.mp4' },
+  { type: 'video', src: 'assets/video7.mp4' },
+  { type: 'video', src: 'assets/video8.mp4' }
+];
+
+const BIRTHDAY_WISH = `Happy Birthday dear Junnu Munnu.. a wish from a new known friend.. From a well wisher for a Billi😺
+Tere saath guzre pal, 
+yaadon ka khazana hain,
+Tu sirf dost nahi, 
+meri duaon ka afsana hain.
+Teri har khushi meri duaon se judi rahe,
+Happy Birthday mere yaar, tu hamesha sukhi rahe. 🎂💖🎉`;
+
+// 3D Animation types
+const ANIMATIONS = [
+  'slideInFromLeft',
+  'slideInFromRight',
+  'zoomIn',
+  'flipIn'
+];
+
+// ========== Main Application ==========
+const sections = {
+  clock: document.getElementById('clockSection'),
+  birthday: document.getElementById('birthdaySection'),
+  media: document.getElementById('mediaSection'),
+  wish: document.getElementById('wishSection'),
+  final: document.getElementById('finalSection')
+};
+
+const mediaContainer = document.getElementById('mediaContainer');
+const typewriterElement = document.getElementById('typewriterText');
+const messageOverlay = document.getElementById('messageOverlay');
+const bgm = document.getElementById('bgm');
+const tickSound = document.getElementById('tickSound');
+const cheerSfx = document.getElementById('cheer');
+
+let currentSection = 'clock';
+let currentMediaIndex = 0;
+let currentVideo = null;
+let countdownInterval;
+let catsInterval;
+
+// Initialize countdown at 23:59:30
+let countdownTime = { hours: 23, minutes: 59, seconds: 30 };
+
+// ========== Background Animation ==========
+function initBackground() {
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  
+  window.addEventListener('resize', resize);
+  resize();
+  
+  const particles = [];
+  const colors = ['#ff4d6d', '#ff9ccf', '#ffb6d0', '#ff7aa2'];
+  
+  function createParticles() {
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 3 + 1,
+        speedX: Math.random() * 2 - 1,
+        speedY: Math.random() * 2 - 1,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      });
+    }
+  }
+  
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      
+      p.x += p.speedX;
+      p.y += p.speedY;
+      
+      if (p.x < 0 || p.x > width) p.speedX *= -1;
+      if (p.y < 0 || p.y > height) p.speedY *= -1;
+    }
+    
+    requestAnimationFrame(animate);
+  }
+  
+  createParticles();
+  animate();
+}
+
+// Falling cats animation
+function startCatsAnimation() {
+  catsInterval = setInterval(() => {
+    const cat = document.createElement('div');
+    cat.className = 'falling-cat';
+    cat.innerHTML = '😺';
+    cat.style.left = Math.random() * 100 + 'vw';
+    cat.style.fontSize = (Math.random() * 20 + 20) + 'px';
+    cat.style.animationDuration = (Math.random() * 5 + 5) + 's';
+    document.body.appendChild(cat);
+    
+    setTimeout(() => {
+      cat.remove();
+    }, 10000);
+  }, 300);
+}
+
+// ========== Core Functions ==========
+function showSection(sectionName) {
+  sections[currentSection].classList.remove('active');
+  currentSection = sectionName;
+  sections[sectionName].classList.add('active');
+  return sections[sectionName];
+}
+
+function updateClock() {
+  countdownTime.seconds++;
+  
+  if (countdownTime.seconds > 59) {
+    countdownTime.seconds = 0;
+    countdownTime.minutes++;
+    
+    if (countdownTime.minutes > 59) {
+      countdownTime.minutes = 0;
+      countdownTime.hours++;
+    }
+  }
+  
+  // Format time display
+  const formattedTime = 
+    `${countdownTime.hours.toString().padStart(2, '0')}:${countdownTime.minutes.toString().padStart(2, '0')}:${countdownTime.seconds.toString().padStart(2, '0')}`;
+  
+  document.querySelector('.clock-time').textContent = formattedTime;
+  
+  // Play tick sound during countdown (only if not yet at midnight)
+  if (!(countdownTime.hours === 24 && countdownTime.minutes === 0 && countdownTime.seconds === 0)) {
+    try {
+      tickSound.currentTime = 0;
+      tickSound.play();
+    } catch(e) {}
+  }
+  
+  // Check if it's midnight
+  if (countdownTime.hours === 24 && countdownTime.minutes === 0 && countdownTime.seconds === 0) {
+    clearInterval(countdownInterval);
+    tickSound.pause(); // Stop tick sound
+    startCelebration();
+  }
+}
+
+function startCelebration() {
+  // Start background animations
+  initBackground();
+  startCatsAnimation();
+  
+  // Show birthday message with overlay
+  messageOverlay.classList.add('active');
+  showSection('birthday');
+  
+  // Play celebration sound
+  try { 
+    cheerSfx.currentTime = 0;
+    cheerSfx.play();
+  } catch(e) {}
+  
+  // After 3 seconds, show media section
+  setTimeout(() => {
+    messageOverlay.classList.remove('active');
+    showSection('media');
+    startMusic();
+    showNextMedia();
+  }, 3000);
+}
+
+function getRandomAnimation() {
+  return ANIMATIONS[Math.floor(Math.random() * ANIMATIONS.length)];
+}
+
+function showNextMedia() {
+  // Clear previous media
+  mediaContainer.innerHTML = '';
+  if (currentVideo) {
+    currentVideo.pause();
+    currentVideo = null;
+  }
+  
+  // Check if we've shown all media
+  if (currentMediaIndex >= MEDIA_FILES.length) {
+    showWishMessage();
+    return;
+  }
+  
+  const media = MEDIA_FILES[currentMediaIndex];
+  const mediaItem = document.createElement('div');
+  mediaItem.className = 'media-item';
+  
+  // Set random 3D animation
+  const animation = getRandomAnimation();
+  mediaItem.style.animation = `${animation} 1s forwards`;
+  
+  if (media.type === 'image') {
+    const img = document.createElement('img');
+    img.src = media.src;
+    img.alt = `Memory ${currentMediaIndex + 1}`;
+    img.onerror = () => {
+      console.error(`Failed to load image: ${media.src}`);
+      // Skip to next media after short delay
+      setTimeout(() => {
+        currentMediaIndex++;
+        showNextMedia();
+      }, 500);
+    };
+    mediaItem.appendChild(img);
+    
+    // Show image for 3 seconds
+    setTimeout(() => {
+      mediaItem.classList.add('active');
+      setTimeout(() => {
+        currentMediaIndex++;
+        showNextMedia();
+      }, 3000);
+    }, 50);
+  } 
+  else {
+    const video = document.createElement('video');
+    video.controls = true;
+    
+    const source = document.createElement('source');
+    source.src = media.src;
+    source.type = 'video/mp4';
+    
+    video.appendChild(source);
+    mediaItem.appendChild(video);
+    currentVideo = video;
+    
+    // Handle video errors
+    video.onerror = () => {
+      console.error(`Failed to load video: ${media.src}`);
+      // Skip to next media after short delay
+      setTimeout(() => {
+        currentMediaIndex++;
+        showNextMedia();
+      }, 500);
+    };
+    
+    // When video is ready to play
+    video.oncanplay = () => {
+      mediaItem.classList.add('active');
+      video.play().catch(e => {
+        console.error('Video play failed:', e);
+        // Skip to next media if play fails
+        setTimeout(() => {
+          currentMediaIndex++;
+          showNextMedia();
+        }, 500);
+      });
+    };
+    
+    // When video ends, go to next media
+    video.onended = () => {
+      setTimeout(() => {
+        currentMediaIndex++;
+        showNextMedia();
+      }, 500);
+    };
+  }
+  
+  mediaContainer.appendChild(mediaItem);
+}
+
+function showWishMessage() {
+  // Show wish section with overlay
+  messageOverlay.classList.add('active');
+  showSection('wish');
+  
+  // Typewriter effect for wish
+  typeWriter(typewriterElement, BIRTHDAY_WISH, 50, () => {
+    // After typing completes, show final section
+    setTimeout(() => {
+      showSection('final');
+      messageOverlay.classList.add('active');
+      
+      // After 5 seconds, stop music and end celebration
+      setTimeout(() => {
+        bgm.pause();
+        bgm.currentTime = 0;
+      }, 5000);
+    }, 1000);
+  });
+}
+
+function typeWriter(element, text, speed, callback) {
+  let i = 0;
+  const typeInterval = setInterval(() => {
+    if (i < text.length) {
+      element.innerHTML = text.substring(0, i + 1);
+      i++;
+    } else {
+      clearInterval(typeInterval);
+      if (callback) callback();
+    }
+  }, speed);
+}
+
+function startMusic() {
+  try {
+    bgm.currentTime = 0;
+    bgm.play().then(() => {
+      document.getElementById('musicControl').textContent = '🔊';
+    }).catch(e => {
+      console.log('Autoplay blocked:', e);
+      // Show play button if autoplay is blocked
+      document.getElementById('musicControl').style.display = 'flex';
+    });
+  } catch(e) {
+    console.log('Music playback error:', e);
+  }
+}
+
+// ========== Event Listeners ==========
+document.getElementById('musicControl').addEventListener('click', () => {
+  if (bgm.paused) {
+    bgm.play();
+    document.getElementById('musicControl').textContent = '🔊';
+  } else {
+    bgm.pause();
+    document.getElementById('musicControl').textContent = '🔇';
+  }
+});
+
+// Start the countdown when page loads
+window.addEventListener('load', () => {
+  showSection('clock');
+  // Start tick sound immediately
+  try {
+    tickSound.currentTime = 0;
+    tickSound.play();
+  } catch(e) {}
+  // Start countdown
+  countdownInterval = setInterval(updateClock, 1000);
+});
+
+// Clean up animations when leaving page
+window.addEventListener('beforeunload', () => {
+  clearInterval(catsInterval);
+  clearInterval(countdownInterval);
+});
+</script>
+</body>
+</html>
